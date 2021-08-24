@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="scit.master.good.dao.MemberMapper">
+	<!-- 회원 가입 -->
+	<insert id="insertMember" parameterType="Member">
+	INSERT INTO members
+	VALUES
+	(
+		#{userid}
+		, #{userpwd}
+		, #{username}
+		, #{email}
+		, #{birth}
+		, #{gender}
+		, #{phone}
+	)
+	</insert>
+	
+	<!-- 회원정보를 이용해 로그인 -->
+	<select id="selectMember" parameterType="Member" resultType="Member">
+	SELECT 
+		userid
+		, userpwd
+		, username
+		, email
+		, to_char(birth, 'YYYY-MM-DD') as birth
+		, gender
+		, phone
+	FROM
+		members
+	WHERE
+		userid = #{userid}
+	<if test="userpwd != null">
+	AND
+		userpwd = #{userpwd}
+	</if>
+	</select>
+	
+	<update id="updateMember" parameterType="Member">
+	UPDATE members
+	SET
+		userpwd = #{userpwd}
+		, email = #{email}
+		, phone = #{phone}
+	WHERE
+		userid = #{userid}
+	</update>
+</mapper>
+
+

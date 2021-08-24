@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="scit.master.good.dao.BoardMapper">
+<!-- 글 저장 -->
+<insert id="insertBoard" parameterType="Board">
+INSERT INTO board
+(
+	boardnum
+	, userid
+	, title
+	, text
+	<if test="originalfile != null">
+	, originalfile
+	, savedfile
+	</if>
+)
+VALUES
+(
+	board_seq.nextval
+	, #{userid}
+	, #{title}
+	, #{text}
+	<if test="originalfile != null">
+	, #{originalfile}
+	, #{savedfile}
+	</if>
+)
+</insert>
+
+
+
+<!-- 글 전체 조회 -->
+<select id="selectBoard" resultType="Board" parameterType="map">
+SELECT * FROM (
+    SELECT rownum n, b.* FROM
+        ( SELECT
+            boardnum
+            , userid
+            , title
+            , text
+            , to_char(regdate, 'YYYY-MM-DD') as regdate
+            , hitcount
+            , originalfile
+            , savedfile
+        FROM board
+        WHERE
+		<choose>
+			<when test="searchItem == 'title'">title</when>
+			<when test="searchItem == 'userid'">userid</when>
+			<when test="searchItem == 'text'">text</when>
+		</choose>
+		LIKE '%' || #{searchWord} ||'%'
+        ORDER BY boardnum DESC 
+    ) b
+)
+WHERE n &gt;= #{srow} and n &lt;= #{erow}
+</select>
+
+<select id="selectOne" parameterType="int" resultType="Board">
+SELECT
+	boardnum
+	, userid
+	, title
+	, text
+	, to_char(regdate, 'YYYY-MM-DD') as regdate
+	, hitcount
+	, originalfile
+	, savedfile
+FROM board
+WHERE
+	boardnum = #{boardnum}
+</select>
+
+<delete id="deleteBoard" parameterType="int">
+DELETE board
+WHERE 
+	boardnum = #{boardnum}
+</delete>
+
+<update id="updateBoard" parameterType="Board">
+UPDATE board
+SET 
+	title = #{title}
+	, text = #{text}
+	, regdate = sysdate
+	
+	<if test="originalfile != null">
+	, originalfile = #{originalfile}
+	, savedfile = #{savedfile}
+	</if>
+	
+	<if test="originalfile == null">
+	, originalfile = ''
+	, savedfile = ''
+	</if>
+	
+	
+WHERE 
+	boardnum = #{boardnum}
+</update>
+
+<!-- 글개수 조회 -->
+<select id="getBoardCount" resultType="int" parameterType="map">
+SELECT
+	count(*)
+FROM
+	board
+WHERE
+	<choose>
+		<when test="searchItem == 'title'">title</when>
+		<when test="searchItem == 'userid'">userid</when>
+		<when test="searchItem == 'text'">text</when>
+	</choose>
+LIKE '%' || #{searchWord} ||'%'
+</select>
+
+<update id="updateHitCount" parameterType="int">
+UPDATE board
+SET
+   hitcount = hitcount + 1
+WHERE
+   boardnum = #{boardnum}
+</update>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
